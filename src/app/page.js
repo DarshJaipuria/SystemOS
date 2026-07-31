@@ -573,38 +573,42 @@ export default function DashboardPage() {
   };
 
   const handleSaveRewards = async () => {
+    const updated = (rewardsFormNames || []).filter(n => n && n.trim()).map((name, i) => ({ id: `r${i+1}`, name: name.trim() }));
+    setRewards(updated.length > 0 ? updated : [
+      { id: 'r1', name: 'Cheat meal (sweet treat or fast food)' },
+      { id: 'r2', name: 'Sleep in / extra hour of rest' }
+    ]);
+    setShowRewardsModal(false);
+    showToast('✅ Rewards updated!');
+
     try {
-      const res = await fetch('/api/v1/rewards', {
+      await fetch('/api/v1/rewards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ month: selectedMonth, year: selectedYear, rewards: rewardsFormNames })
       });
-      const data = await res.json();
-      if (res.ok) {
-        setRewards(data.rewards || []);
-        setShowRewardsModal(false);
-      } else {
-        showToast(data.error?.message || 'Failed to save rewards', 'error');
-      }
-    } catch (err) { console.error('Error saving rewards:', err); }
+    } catch (err) {
+      console.error('Error saving rewards:', err);
+    }
   };
 
   const handleSaveClaims = async () => {
+    const otherClaims = (validClaimedRewards || []).filter(c => c.date !== selectedClaimDate);
+    const newClaims = (selectedClaimedIds || []).map((rId, i) => ({ id: `claim_${selectedClaimDate}_${rId}`, rewardId: rId, date: selectedClaimDate }));
+    const updatedClaims = [...otherClaims, ...newClaims];
+    setClaimedRewards(updatedClaims);
+    setShowClaimModal(false);
+    showToast('🎉 Rewards claimed!');
+
     try {
-      const res = await fetch('/api/v1/rewards/claim', {
+      await fetch('/api/v1/rewards/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: selectedClaimDate, claimedRewardIds: selectedClaimedIds })
       });
-      const data = await res.json();
-      if (res.ok) {
-        const rewardsRes = await fetch(`/api/v1/rewards?month=${selectedMonth}&year=${selectedYear}`);
-        const rewardsData = await rewardsRes.json();
-        if (rewardsRes.ok) setClaimedRewards(rewardsData.claimedRewards || []);
-      } else {
-        showToast(data.error?.message || 'Failed to save claims', 'error');
-      }
-    } catch (err) { console.error('Error claiming rewards:', err); }
+    } catch (err) {
+      console.error('Error claiming rewards:', err);
+    }
   };
 
   const handleSaveAffirmation = async (text) => {
