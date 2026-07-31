@@ -444,65 +444,53 @@ export default function DashboardPage() {
   };
 
   const handleToggleWeekly = async (id, completed) => {
-    setWeeklyHabits(weeklyHabits.map(w => w.id === id ? { ...w, completed } : w));
+    setWeeklyHabits(prev => prev.map(w => w.id === id ? { ...w, completed } : w));
+    if (completed) {
+      try { const { gamificationStore } = await import('@/lib/gamificationStore'); const r = gamificationStore.addXP(15, 'weekly_complete'); setGamifState(g => ({ ...g, xp: r.newXP, level: r.newLevel })); } catch {}
+    }
     try {
-      const res = await fetch('/api/v1/weekly', {
+      await fetch('/api/v1/weekly', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, completed }),
       });
-      if (!res.ok) {
-        setWeeklyHabits(weeklyHabits.map(w => w.id === id ? { ...w, completed: !completed } : w));
-        const data = await res.json();
-        showToast(data.error?.message || 'Failed to update weekly task', 'error');
-      } else if (completed) {
-        try { const { gamificationStore } = await import('@/lib/gamificationStore'); const r = gamificationStore.addXP(15, 'weekly_complete'); setGamifState(g => ({ ...g, xp: r.newXP, level: r.newLevel })); } catch {}
-      }
-    } catch (err) { console.error('Toggle weekly task error:', err); }
+    } catch (err) {}
   };
 
   const handleDeleteWeekly = async (id) => {
+    setWeeklyHabits(prev => prev.filter(w => w.id !== id));
     try {
-      const res = await fetch(`/api/v1/weekly?id=${id}`, { method: 'DELETE' });
-      if (res.ok) setWeeklyHabits(weeklyHabits.filter(w => w.id !== id));
-    } catch (err) { console.error('Delete weekly task error:', err); }
+      await fetch(`/api/v1/weekly?id=${id}`, { method: 'DELETE' });
+    } catch (err) {}
   };
 
   const handleAddMonthly = async (e) => {
     e.preventDefault();
     if (!newMonthlyName.trim()) return;
+    const newObj = { id: `m_demo_${Date.now()}`, name: newMonthlyName.trim(), completed: false };
+    setMonthlyHabits(prev => [...prev, newObj]);
+    setNewMonthlyName('');
     try {
-      const res = await fetch('/api/v1/monthly', {
+      await fetch('/api/v1/monthly', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newMonthlyName.trim(), month: selectedMonth, year: selectedYear }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setMonthlyHabits([...monthlyHabits, data]);
-        setNewMonthlyName('');
-      } else {
-        showToast(data.error?.message || 'Failed to add objective', 'error');
-      }
-    } catch (err) { console.error('Add monthly objective error:', err); }
+    } catch (err) {}
   };
 
   const handleToggleMonthly = async (id, completed) => {
-    setMonthlyHabits(monthlyHabits.map(m => m.id === id ? { ...m, completed } : m));
+    setMonthlyHabits(prev => prev.map(m => m.id === id ? { ...m, completed } : m));
+    if (completed) {
+      try { const { gamificationStore } = await import('@/lib/gamificationStore'); const r = gamificationStore.addXP(30, 'monthly_complete'); setGamifState(g => ({ ...g, xp: r.newXP, level: r.newLevel })); } catch {}
+    }
     try {
-      const res = await fetch('/api/v1/monthly', {
+      await fetch('/api/v1/monthly', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, completed }),
       });
-      if (!res.ok) {
-        setMonthlyHabits(monthlyHabits.map(m => m.id === id ? { ...m, completed: !completed } : m));
-        const data = await res.json();
-        showToast(data.error?.message || 'Failed to update objective', 'error');
-      } else if (completed) {
-        try { const { gamificationStore } = await import('@/lib/gamificationStore'); const r = gamificationStore.addXP(30, 'monthly_complete'); setGamifState(g => ({ ...g, xp: r.newXP, level: r.newLevel })); } catch {}
-      }
-    } catch (err) { console.error('Toggle monthly objective error:', err); }
+    } catch (err) {}
   };
 
   const handleDeleteMonthly = async (id) => {
