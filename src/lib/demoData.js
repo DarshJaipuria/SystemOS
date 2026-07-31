@@ -38,12 +38,16 @@ export const HABIT_TEMPLATES = {
 
 export const generateDemoHabits = () => {
   const habits = [
-    { name: 'Morning Exercise', prob: 0.6 },
-    { name: 'Read 30 Pages', prob: 0.65 },
-    { name: 'Drink 8 Glasses Water', prob: 0.8 },
-    { name: 'No Social Media After 9 PM', prob: 0.5 },
-    { name: 'Study 2 Hours', prob: 0.8 },
-    { name: 'Meditate 10 Minutes', prob: 0.4 }
+    { name: 'No Social Media Before Noon', prob: 0.7, goalDays: 30 },
+    { name: 'Read 20 Pages', prob: 0.8, goalDays: 30 },
+    { name: 'Morning Review', prob: 0.95, goalDays: 31 },
+    { name: 'Sleep Before 11 PM', prob: 0.65, goalDays: 30 },
+    { name: 'Morning Exercise', prob: 0.75, goalDays: 30 },
+    { name: 'Read 30 Pages', prob: 0.7, goalDays: 30 },
+    { name: 'Drink 8 Glasses Water', prob: 0.85, goalDays: 30 },
+    { name: 'No Social Media After 9 PM', prob: 0.6, goalDays: 30 },
+    { name: 'Study 2 Hours', prob: 0.85, goalDays: 30 },
+    { name: 'Meditate 10 Minutes', prob: 0.55, goalDays: 30 }
   ];
   
   const today = new Date();
@@ -51,7 +55,7 @@ export const generateDemoHabits = () => {
   return habits.map((h, i) => {
     const completions = [];
     for (let d = 0; d < 60; d++) {
-      if (Math.random() < h.prob) {
+      if (Math.random() < h.prob || (h.name === 'Morning Review' && d < 31)) {
         const date = new Date(today);
         date.setDate(today.getDate() - d);
         completions.push({ date: date.toISOString().split('T')[0] });
@@ -61,7 +65,7 @@ export const generateDemoHabits = () => {
       id: 'demo_' + (i + 1),
       name: h.name,
       completions,
-      goalDays: 30
+      goalDays: h.goalDays
     };
   });
 };
