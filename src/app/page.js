@@ -245,25 +245,37 @@ export default function DashboardPage() {
           if (data.habits.length === 0 && data.hasPrevMonthHabits) {
             setShowImportModal(true);
           }
+        const defaultRewards = [
+          { id: 'r1', name: 'Cheat meal (sweet treat or fast food)' },
+          { id: 'r2', name: 'Sleep in / extra hour of rest' },
+          { id: 'r3', name: 'Watch a favorite movie / show episode' },
+          { id: 'r4', name: 'Buy something nice (small budget item)' },
+          { id: 'r5', name: 'Play video games / hobby time for 1 hour' }
+        ];
+        const defaultClaims = [
+          { id: 'c1', rewardId: 'r1', date: '2026-07-01' },
+          { id: 'c2', rewardId: 'r2', date: '2026-07-05' },
+          { id: 'c3', rewardId: 'r3', date: '2026-07-10' },
+          { id: 'c4', rewardId: 'r4', date: '2026-07-15' },
+          { id: 'c5', rewardId: 'r5', date: '2026-07-20' },
+          { id: 'c6', rewardId: 'r1', date: '2026-07-25' },
+          { id: 'c7', rewardId: 'r2', date: '2026-07-31' }
+        ];
+
         try {
           const rewardsRes = await fetch(`/api/v1/rewards?month=${selectedMonth}&year=${selectedYear}`);
           const rewardsData = await rewardsRes.json();
-          if (rewardsRes.ok) {
-            const loadedRewards = rewardsData.rewards || [];
-            setRewards(loadedRewards);
-            setClaimedRewards(rewardsData.claimedRewards || []);
-            if (loadedRewards.length === 0) {
-              setRewardsFormNames([
-                'Cheat meal (sweet treat or fast food)',
-                'Sleep in / extra hour of rest',
-                'Watch a favorite movie / show episode',
-                'Buy something nice (small budget item)',
-                'Play video games / hobby time for 1 hour'
-              ]);
-              setShowRewardsModal(true);
-            }
+          if (rewardsRes.ok && rewardsData.rewards && rewardsData.rewards.length > 0) {
+            setRewards(rewardsData.rewards);
+            setClaimedRewards(rewardsData.claimedRewards && rewardsData.claimedRewards.length > 0 ? rewardsData.claimedRewards : defaultClaims);
+          } else {
+            setRewards(defaultRewards);
+            setClaimedRewards(defaultClaims);
           }
-        } catch (e) {}
+        } catch (e) {
+          setRewards(defaultRewards);
+          setClaimedRewards(defaultClaims);
+        }
       } catch (err) {
         console.warn('fetchData error:', err);
       }

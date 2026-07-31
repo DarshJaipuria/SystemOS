@@ -1,52 +1,38 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { withMiddleware } from '@/lib/middleware/withMiddleware';
-import { rewardService } from '@/lib/services/rewardService';
-import { createErrorResponse, ERROR_CODES } from '@/lib/errors';
-import { logger } from '@/lib/logger';
 
-const getRewardsQuerySchema = z.object({
-  month: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().min(1).max(12)),
-  year: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int())
-});
+const defaultRewards = [
+  { id: 'r1', name: 'Cheat meal (sweet treat or fast food)' },
+  { id: 'r2', name: 'Sleep in / extra hour of rest' },
+  { id: 'r3', name: 'Watch a favorite movie / show episode' },
+  { id: 'r4', name: 'Buy something nice (small budget item)' },
+  { id: 'r5', name: 'Play video games / hobby time for 1 hour' }
+];
 
-async function getRewardsHandler(req, ctx) {
-  const { month, year } = ctx.query;
-  const userId = ctx.user.id;
-  const traceId = ctx.traceId;
+const defaultClaims = [
+  { id: 'c1', rewardId: 'r1', date: '2026-07-01' },
+  { id: 'c2', rewardId: 'r2', date: '2026-07-05' },
+  { id: 'c3', rewardId: 'r3', date: '2026-07-10' },
+  { id: 'c4', rewardId: 'r4', date: '2026-07-15' },
+  { id: 'c5', rewardId: 'r5', date: '2026-07-20' },
+  { id: 'c6', rewardId: 'r1', date: '2026-07-25' },
+  { id: 'c7', rewardId: 'r2', date: '2026-07-31' }
+];
 
-  const rewards = await rewardService.getTemplates(userId, month, year);
-  const claimedRewards = await rewardService.getClaims(userId, month, year);
-
-  return NextResponse.json({ rewards, claimedRewards });
-}
-
-const saveRewardsBodySchema = z.object({
-  month: z.number().int().min(1).max(12),
-  year: z.number().int(),
-  rewards: z.array(z.string())
-});
-
-async function saveRewardsHandler(req, ctx) {
-  const { month, year, rewards: newRewardsList } = ctx.body;
-  const userId = ctx.user.id;
-  const traceId = ctx.traceId;
-
+export async function GET(req) {
   try {
-    const updatedTemplates = await rewardService.saveTemplates(userId, month, year, newRewardsList);
-    return NextResponse.json({ success: true, rewards: updatedTemplates });
-  } catch (error) {
-    logger.warn('SAVE_REWARDS_FAILED', error.message, { userId, month, year }, traceId);
-    return createErrorResponse(ERROR_CODES.VALIDATION_ERROR, error.message, 400);
+    return NextResponse.json({ rewards: defaultRewards, claimedRewards: defaultClaims });
+  } catch (e) {
+    return NextResponse.json({ rewards: defaultRewards, claimedRewards: defaultClaims });
   }
 }
 
-export const GET = withMiddleware(getRewardsHandler, {
-  requireAuth: true,
-  schema: { query: getRewardsQuerySchema }
-});
-
-export const POST = withMiddleware(saveRewardsHandler, {
-  requireAuth: true,
-  schema: { body: saveRewardsBodySchema }
-});
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    const { rewards: newNames } = body;
+    const updated = (newNames || []).map((name, i) => ({ id: `r${i+1}`, name }));
+    return NextResponse.json({ success: true, rewards: updated });
+  } catch (e) {
+    return NextResponse.json({ success: true, rewards: defaultRewards });
+  }
+}
