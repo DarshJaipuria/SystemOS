@@ -19,7 +19,8 @@ export default function TrackerTable({
   handleToggleCompletion,
   validClaimedRewards,
   handleOpenClaimModal,
-  getUnlockedRewards
+  getUnlockedRewards,
+  openEditRewards
 }) {
   return (
     <section className={styles.trackerSection}>
