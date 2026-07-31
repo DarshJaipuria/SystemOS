@@ -1,0 +1,31 @@
+{
+  "name": "SystemOS",
+  "short_name": "SystemOS",
+  "description": "Student Habit Tracker & Digital Wellness Monitor",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f4f0",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "health", "lifestyle", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/",
+      "description": "View your habit dashboard"
+    }
+  ]
+}

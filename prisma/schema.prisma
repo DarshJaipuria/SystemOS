@@ -1,0 +1,190 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  passwordHash      String
+  name              String?
+  createdAt         DateTime            @default(now())
+  
+  // Relations
+  habits            Habit[]
+  weeklyHabits      WeeklyHabit[]
+  monthlyHabits     MonthlyHabit[]
+  reflections       Reflection[]
+  rewards           Reward[]
+  claimedRewards    ClaimedReward[]
+  wellnessLogs      WellnessLog[]
+  gamification      GamificationState?
+  pomodoroSessions  PomodoroSession[]
+}
+
+model Habit {
+  id           String       @id @default(uuid())
+  userId       String
+  name         String
+  month        Int          // 1-12
+  year         Int
+  goalDays     Int          @default(30)
+  displayOrder Int          @default(0)
+  createdAt    DateTime     @default(now())
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions  Completion[]
+
+  @@unique([userId, name, month, year])
+  @@index([userId, month, year])
+}
+
+model Completion {
+  id        String   @id @default(uuid())
+  habitId   String
+  date      String   // Format: YYYY-MM-DD (prevents timezone offset bugs)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+}
+
+model WeeklyHabit {
+  id           String   @id @default(uuid())
+  userId       String
+  name         String
+  month        Int
+  year         Int
+  weekIndex    Int      // 1 to 5
+  completed    Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, month, year])
+}
+
+model MonthlyHabit {
+  id           String   @id @default(uuid())
+  userId       String
+  name         String
+  month        Int
+  year         Int
+  completed    Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, month, year])
+}
+
+model Reflection {
+  id          String   @id @default(uuid())
+  userId      String
+  month       Int
+  year        Int
+  text        String   @db.Text
+  imageUrl    String?  // Optional uploaded image or preselected aesthetic image URL
+  polaroidUrl String?  // Optional uploaded image or preselected polaroid URL
+  affirmation String?  // "I am..." text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, year])
+}
+
+model Reward {
+  id        String          @id @default(uuid())
+  userId    String
+  name      String
+  month     Int
+  year      Int
+  createdAt DateTime        @default(now())
+
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  claims    ClaimedReward[]
+
+  @@unique([userId, name, month, year])
+  @@index([userId, month, year])
+}
+
+model ClaimedReward {
+  id        String   @id @default(uuid())
+  userId    String
+  rewardId  String
+  date      String   // YYYY-MM-DD
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward    Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([rewardId])
+}
+
+// ─── New models added for hackathon features ──────────────────────────────────
+
+model WellnessLog {
+  id                String   @id @default(uuid())
+  userId            String
+  date              String   // YYYY-MM-DD
+  screenTime        Float    @default(0)   // total hours on phone/screens
+  socialMedia       Float    @default(0)   // hours on social media
+  gaming            Float    @default(0)   // hours gaming
+  studyHours        Float    @default(0)   // hours studied
+  sleep             Float    @default(0)   // hours slept
+  waterGlasses      Int      @default(0)   // 250 ml glasses consumed
+  exerciseMinutes   Int      @default(0)
+  meditationMinutes Int      @default(0)
+  mood              Int      @default(3)   // 1-5 scale
+  stress            Int      @default(5)   // 1-10 scale (lower is better)
+  energy            Int      @default(5)   // 1-10 scale
+  focus             Int      @default(5)   // 1-10 scale
+  healthScore       Float    @default(0)   // cached computed score 0-100
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId])
+}
+
+model GamificationState {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  xp        Int      @default(0)
+  level     Int      @default(1)
+  coins     Int      @default(0)
+  badges    Json     @default("[]")   // string[] of badge IDs
+  missions  Json     @default("{}")   // { daily: {...}, weekly: {...} }
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PomodoroSession {
+  id        String   @id @default(uuid())
+  userId    String
+  date      String   // YYYY-MM-DD
+  subject   String
+  minutes   Int      @default(25)
+  completed Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
