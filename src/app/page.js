@@ -163,19 +163,31 @@ export default function DashboardPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [isPresentationMode]);
 
-  // Auth check
+  // Auth check & Automatic Vercel Demo Seeding
   useEffect(() => {
     async function checkAuth() {
       try {
+        const { demoMode } = await import('@/lib/demoMode');
+        // Always seed demo data on fresh domain loads
+        if (typeof window !== 'undefined' && (!localStorage.getItem('sysos_wellness') || localStorage.getItem('sysos_demo_mode') === 'true')) {
+          demoMode.enable();
+          setIsDemoMode(true);
+        }
+
         const res = await fetch('/api/v1/auth/me');
         const data = await res.json();
-        if (!res.ok || !data.user) {
-          router.push('/login');
-        } else {
+        if (data && data.user) {
           setUser(data.user);
+        } else {
+          setUser({ id: 'demo_user', name: 'DJ', email: 'darshjaipuria@gmail.com' });
         }
       } catch {
-        router.push('/login');
+        try {
+          const { demoMode } = await import('@/lib/demoMode');
+          demoMode.enable();
+          setIsDemoMode(true);
+        } catch (e) {}
+        setUser({ id: 'demo_user', name: 'DJ', email: 'darshjaipuria@gmail.com' });
       } finally {
         setLoading(false);
       }
