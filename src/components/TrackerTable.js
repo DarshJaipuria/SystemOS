@@ -121,9 +121,14 @@ export default function TrackerTable({
                       return <td key={`cell-${habit.id}-${colIdx}`} className={styles.gridCell} />;
                     }
                     
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    const d = new Date();
+                    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                     const isFutureDate = col.dateStr > todayStr;
-                    const isChecked = habit.completions?.some(c => c.date === col.dateStr) || false;
+                    const isChecked = Boolean(
+                      habit.completions?.some(c => (typeof c === 'string' ? c : c?.date) === col.dateStr) ||
+                      habit.completedDays?.some(d => (typeof d === 'string' ? d : d?.date) === col.dateStr) ||
+                      habit.history?.some(h => (typeof h === 'string' ? h : h?.date) === col.dateStr)
+                    );
                     const checkboxClass = styles[`checkboxWeek${col.weekIndex}`];
                     
                     return (
@@ -190,8 +195,11 @@ export default function TrackerTable({
                   }
                   
                   const completionsCount = habits.filter(h => 
-                    h.completions?.some(c => c.date === col.dateStr)
+                    h.completions?.some(c => (typeof c === 'string' ? c : c?.date) === col.dateStr) ||
+                    h.completedDays?.some(d => (typeof d === 'string' ? d : d?.date) === col.dateStr) ||
+                    h.history?.some(h => (typeof h === 'string' ? h : h?.date) === col.dateStr)
                   ).length;
+                  
                   const unlockedRewards = getUnlockedRewards(completionsCount);
                   const dayClaims = validClaimedRewards.filter(c => c.date === col.dateStr);
                   const claimedCount = dayClaims.length;
@@ -208,6 +216,7 @@ export default function TrackerTable({
                         className={styles.rewardCell}
                         onClick={() => handleOpenClaimModal(col.dateStr, unlockedRewards)}
                         title="Click to claim rewards"
+                        style={{ cursor: 'pointer', padding: '2px' }}
                       >
                         <span className={`${styles.rewardBadge} ${badgeClass}`}>
                           🎁 {claimedCount}/{unlockedRewards}
@@ -217,8 +226,16 @@ export default function TrackerTable({
                   }
                   
                   return (
-                    <td key={`reward-cell-${idx}`} className={styles.gridCell} style={{ opacity: 0.15, fontSize: '10px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                      •
+                    <td 
+                      key={`reward-cell-${idx}`} 
+                      className={styles.rewardCell}
+                      onClick={() => handleOpenClaimModal(col.dateStr, 1)}
+                      style={{ cursor: 'pointer', padding: '2px', opacity: 0.6 }}
+                      title="Click to manage monthly rewards"
+                    >
+                      <span className={`${styles.rewardBadge} ${styles.rewardBadgeUnclaimed}`} style={{ opacity: 0.6 }}>
+                        🎁 0/1
+                      </span>
                     </td>
                   );
                 })}
