@@ -38,31 +38,33 @@ export const HABIT_TEMPLATES = {
 
 export const generateDemoHabits = () => {
   const habits = [
-    { name: 'No Social Media Before Noon', prob: 0.7, goalDays: 30 },
-    { name: 'Read 20 Pages', prob: 0.8, goalDays: 30 },
-    { name: 'Morning Review', prob: 0.95, goalDays: 31 },
-    { name: 'Sleep Before 11 PM', prob: 0.65, goalDays: 30 },
-    { name: 'Morning Exercise', prob: 0.75, goalDays: 30 },
-    { name: 'Read 30 Pages', prob: 0.7, goalDays: 30 },
-    { name: 'Drink 8 Glasses Water', prob: 0.85, goalDays: 30 },
-    { name: 'No Social Media After 9 PM', prob: 0.6, goalDays: 30 },
-    { name: 'Study 2 Hours', prob: 0.85, goalDays: 30 },
-    { name: 'Meditate 10 Minutes', prob: 0.55, goalDays: 30 }
+    { name: 'No Social Media Before Noon', goalDays: 30, pattern: [1,0,1,1,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1] },
+    { name: 'Read 20 Pages', goalDays: 30, pattern: [1,1,1,1,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1,1,1] },
+    { name: 'Morning Review', goalDays: 31, pattern: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] },
+    { name: 'Sleep Before 11 PM', goalDays: 30, pattern: [1,0,0,1,0,1,1,0,1,1,1,0,1,1,1,1,1,1,0,1,1,0,1,0,0,1,1,0,1,1,1] },
+    { name: 'Morning Exercise', goalDays: 30, pattern: [1,0,1,1,0,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1] },
+    { name: 'Read 30 Pages', goalDays: 30, pattern: [1,1,1,1,0,1,1,0,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1,1,1] },
+    { name: 'Drink 8 Glasses Water', goalDays: 30, pattern: [1,0,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1] },
+    { name: 'No Social Media After 9 PM', goalDays: 30, pattern: [1,0,0,1,0,1,1,0,0,1,0,0,0,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,1,1,1] },
+    { name: 'Study 2 Hours', goalDays: 30, pattern: [1,1,1,1,0,0,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1] },
+    { name: 'Meditate 10 Minutes', goalDays: 30, pattern: [1,0,1,0,0,1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,1,1,1,1,0,0,1,0,1,1,1] }
   ];
   
-  const today = new Date();
+  const year = 2026;
+  const month = 7; // July
   
   return habits.map((h, i) => {
     const completions = [];
-    for (let d = 0; d < 60; d++) {
-      if (Math.random() < h.prob || (h.name === 'Morning Review' && d < 31)) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - d);
-        completions.push({ date: date.toISOString().split('T')[0] });
+    h.pattern.forEach((checked, dayIdx) => {
+      if (checked) {
+        const dayNum = dayIdx + 1;
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+        completions.push({ date: dateStr });
       }
-    }
+    });
+    
     return {
-      id: 'demo_' + (i + 1),
+      id: `demo_${i + 1}`,
       name: h.name,
       completions,
       goalDays: h.goalDays
@@ -72,20 +74,20 @@ export const generateDemoHabits = () => {
 
 export const generateDemoWellnessLogs = () => {
   const logs = [];
-  const today = new Date();
-  for (let i = 0; i < 30; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
+  const year = 2026;
+  const month = 7;
+  for (let i = 1; i <= 31; i++) {
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     logs.push({
-      date: d.toISOString().split('T')[0],
-      sleep: 5 + Math.floor(Math.random() * 4),
-      screenTime: 2 + Math.floor(Math.random() * 5),
-      water: 3 + Math.floor(Math.random() * 6),
-      stress: 2 + Math.floor(Math.random() * 6),
-      exercise: Math.floor(Math.random() * 60),
-      studyHours: 1 + Math.floor(Math.random() * 6),
-      mood: 2 + Math.floor(Math.random() * 3),
-      habitCompletionPct: 40 + Math.floor(Math.random() * 60)
+      date: dateStr,
+      sleep: 7 + (i % 3),
+      screenTime: 2 + (i % 4),
+      water: 6 + (i % 3),
+      stress: 3 + (i % 4),
+      exercise: 20 + (i % 4) * 15,
+      studyHours: 4 + (i % 3),
+      mood: 4,
+      habitCompletionPct: 75 + (i % 20)
     });
   }
   return logs;
@@ -93,17 +95,18 @@ export const generateDemoWellnessLogs = () => {
 
 export const generateDemoPomodoros = () => {
   const sessions = [];
-  const today = new Date();
   const subjects = ['Math', 'Physics', 'Chemistry', 'Biology', 'History'];
+  const year = 2026;
+  const month = 7;
   
-  for (let i = 0; i < 20; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - Math.floor(Math.random() * 14));
+  for (let i = 1; i <= 20; i++) {
+    const dayNum = ((i * 3) % 28) + 1;
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     sessions.push({
-      date: d.toISOString().split('T')[0],
-      subject: subjects[Math.floor(Math.random() * subjects.length)],
+      date: dateStr,
+      subject: subjects[i % subjects.length],
       minutes: 25,
-      timestamp: d.toISOString()
+      timestamp: `${dateStr}T10:00:00.000Z`
     });
   }
   return sessions;
