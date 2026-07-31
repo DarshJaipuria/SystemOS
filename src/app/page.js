@@ -188,66 +188,73 @@ export default function DashboardPage() {
     if (!user) return;
     async function fetchData() {
       try {
-        const res = await fetch(`/api/v1/habits?month=${selectedMonth}&year=${selectedYear}`);
-        const data = await res.json();
-        if (res.ok) {
-          let loadedHabits = data.habits || [];
-          try {
-            const { demoMode } = await import('@/lib/demoMode');
-            const isDemo = localStorage.getItem('sysos_demo_mode') === 'true' || loadedHabits.length === 0;
-            if (isDemo) {
-              demoMode.enable();
-              setIsDemoMode(true);
-              const demoHabits = demoMode.getDemoHabits();
-              loadedHabits = [...loadedHabits, ...demoHabits.filter(dh => !loadedHabits.some(h => h.name.toLowerCase() === dh.name.toLowerCase()))];
-            }
-          } catch (e) {}
+        let loadedHabits = [];
+        let data = {};
+        try {
+          const res = await fetch(`/api/v1/habits?month=${selectedMonth}&year=${selectedYear}`);
+          if (res.ok) {
+            data = await res.json();
+            loadedHabits = data.habits || [];
+          }
+        } catch (e) {}
 
-          const defaultWeekly = [
-            { id: 'w_demo_1', weekIndex: 1, name: 'Organize study planner', completed: true },
-            { id: 'w_demo_2', weekIndex: 2, name: 'Review week 1 & 2 notes', completed: true },
-            { id: 'w_demo_3', weekIndex: 3, name: 'Complete practice test', completed: false },
-            { id: 'w_demo_4', weekIndex: 4, name: 'Summarize key subjects', completed: false },
-            { id: 'w_demo_5', weekIndex: 5, name: 'Plan next month goals', completed: false }
-          ];
-          const defaultMonthly = [
-            { id: 'm_demo_1', name: 'Read 1 Skill / Non-Fiction Book', completed: true },
-            { id: 'm_demo_2', name: 'Maintain 80%+ Health Score all month', completed: false },
-            { id: 'm_demo_3', name: 'Complete 20+ Pomodoro Sessions', completed: true }
-          ];
+        const { demoMode } = await import('@/lib/demoMode');
+        demoMode.enable();
+        setIsDemoMode(true);
+        const demoHabits = demoMode.getDemoHabits();
 
-          setHabits(loadedHabits);
-          setWeeklyHabits(data.weeklyHabits && data.weeklyHabits.length > 0 ? data.weeklyHabits : defaultWeekly);
-          setMonthlyHabits(data.monthlyHabits && data.monthlyHabits.length > 0 ? data.monthlyHabits : defaultMonthly);
-          setReflection(data.reflection || null);
-          setReflectionText(data.reflection?.text || '');
-          setAffirmationText(data.reflection?.affirmation || 'Focused, intentional, and ready for the month ahead.');
-          setHasPrevMonthHabits(data.hasPrevMonthHabits);
-          setPrevMonthDetails(data.prevMonthDetails);
+        if (loadedHabits.length === 0) {
+          loadedHabits = demoHabits;
+        } else {
+          loadedHabits = [...loadedHabits, ...demoHabits.filter(dh => !loadedHabits.some(h => h.name.toLowerCase() === dh.name.toLowerCase()))];
+        }
+
+        const defaultWeekly = [
+          { id: 'w_demo_1', weekIndex: 1, name: 'Organize study planner', completed: true },
+          { id: 'w_demo_2', weekIndex: 2, name: 'Review week 1 & 2 notes', completed: true },
+          { id: 'w_demo_3', weekIndex: 3, name: 'Complete practice test', completed: false },
+          { id: 'w_demo_4', weekIndex: 4, name: 'Summarize key subjects', completed: false },
+          { id: 'w_demo_5', weekIndex: 5, name: 'Plan next month goals', completed: false }
+        ];
+        const defaultMonthly = [
+          { id: 'm_demo_1', name: 'Read 1 Skill / Non-Fiction Book', completed: true },
+          { id: 'm_demo_2', name: 'Maintain 80%+ Health Score all month', completed: false },
+          { id: 'm_demo_3', name: 'Complete 20+ Pomodoro Sessions', completed: true }
+        ];
+
+        setHabits(loadedHabits);
+        setWeeklyHabits(data.weeklyHabits && data.weeklyHabits.length > 0 ? data.weeklyHabits : defaultWeekly);
+        setMonthlyHabits(data.monthlyHabits && data.monthlyHabits.length > 0 ? data.monthlyHabits : defaultMonthly);
+        setReflection(data.reflection || null);
+        setReflectionText(data.reflection?.text || '');
+        setAffirmationText(data.reflection?.affirmation || 'Focused, intentional, and ready for the month ahead.');
+        setHasPrevMonthHabits(data.hasPrevMonthHabits || false);
+        setPrevMonthDetails(data.prevMonthDetails || { month: selectedMonth - 1 || 12, year: selectedMonth === 1 ? selectedYear - 1 : selectedYear });
           if (data.habits.length === 0 && data.hasPrevMonthHabits) {
             setShowImportModal(true);
           }
-          try {
-            const rewardsRes = await fetch(`/api/v1/rewards?month=${selectedMonth}&year=${selectedYear}`);
-            const rewardsData = await rewardsRes.json();
-            if (rewardsRes.ok) {
-              const loadedRewards = rewardsData.rewards || [];
-              setRewards(loadedRewards);
-              setClaimedRewards(rewardsData.claimedRewards || []);
-              if (loadedRewards.length === 0) {
-                setRewardsFormNames([
-                  'Cheat meal (sweet treat or fast food)',
-                  'Sleep in / extra hour of rest',
-                  'Watch a favorite movie / show episode',
-                  'Buy something nice (small budget item)',
-                  'Play video games / hobby time for 1 hour'
-                ]);
-                setShowRewardsModal(true);
-              }
+        try {
+          const rewardsRes = await fetch(`/api/v1/rewards?month=${selectedMonth}&year=${selectedYear}`);
+          const rewardsData = await rewardsRes.json();
+          if (rewardsRes.ok) {
+            const loadedRewards = rewardsData.rewards || [];
+            setRewards(loadedRewards);
+            setClaimedRewards(rewardsData.claimedRewards || []);
+            if (loadedRewards.length === 0) {
+              setRewardsFormNames([
+                'Cheat meal (sweet treat or fast food)',
+                'Sleep in / extra hour of rest',
+                'Watch a favorite movie / show episode',
+                'Buy something nice (small budget item)',
+                'Play video games / hobby time for 1 hour'
+              ]);
+              setShowRewardsModal(true);
             }
-          } catch {}
-        }
-      } catch {}
+          }
+        } catch (e) {}
+      } catch (err) {
+        console.warn('fetchData error:', err);
+      }
     }
     fetchData();
   }, [user, selectedMonth, selectedYear]);
