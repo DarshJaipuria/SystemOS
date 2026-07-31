@@ -29,7 +29,7 @@ export default function HabitsTab(props) {
   const categories = ['All', 'Study', 'Health', 'Fitness', 'Wellness', 'Focus', 'Other'];
 
   const getCategory = (name) => {
-    const n = name.toLowerCase();
+    const n = (name || '').toLowerCase();
     if (n.includes('study') || n.includes('read') || n.includes('hw')) return 'Study';
     if (n.includes('water') || n.includes('sleep') || n.includes('eat')) return 'Health';
     if (n.includes('workout') || n.includes('run') || n.includes('gym')) return 'Fitness';
@@ -38,9 +38,11 @@ export default function HabitsTab(props) {
     return 'Other';
   };
 
-  const filteredHabits = habits.filter(h => {
-    const matchSearch = h.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchCat = activeCategory === 'All' || getCategory(h.name) === activeCategory;
+  const filteredHabits = (habits || []).filter(h => {
+    if (!h) return false;
+    const habitName = h.name || h.title || '';
+    const matchSearch = habitName.toLowerCase().includes((searchQuery || '').toLowerCase());
+    const matchCat = activeCategory === 'All' || getCategory(habitName) === activeCategory;
     return matchSearch && matchCat;
   });
 

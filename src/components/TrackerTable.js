@@ -5,23 +5,28 @@ import { Plus, Trash2, Edit2, Gift } from 'lucide-react';
 import styles from '@/app/page.module.css';
 
 export default function TrackerTable({
-  habits,
-  habitsStats,
-  calendarCols,
-  daysCount,
-  newHabitName,
+  habits = [],
+  habitsStats = [],
+  calendarCols = [],
+  daysCount = 31,
+  newHabitName = '',
   setNewHabitName,
-  newHabitGoal,
+  newHabitGoal = 15,
   setNewHabitGoal,
   handleAddHabit,
   openEditHabit,
   handleDeleteHabit,
   handleToggleCompletion,
-  validClaimedRewards,
+  validClaimedRewards = [],
   handleOpenClaimModal,
   getUnlockedRewards,
   openEditRewards
 }) {
+  const safeCols = calendarCols || [];
+  const safeHabitsStats = (habitsStats && habitsStats.length > 0) ? habitsStats : (habits || []);
+  const safeClaims = validClaimedRewards || [];
+  const safeGetUnlocked = typeof getUnlockedRewards === 'function' ? getUnlockedRewards : () => 0;
+
   return (
     <section className={styles.trackerSection}>
       <div className={styles.gridCard}>
@@ -68,7 +73,7 @@ export default function TrackerTable({
               
               {/* Row 2: Day letters */}
               <tr>
-                {calendarCols.map((col, idx) => {
+                {safeCols.map((col, idx) => {
                   const bgClass = styles[`thDayLetter${col.weekIndex}`];
                   return (
                     <th key={`letter-${idx}`} className={`${styles.thDayLetter} ${bgClass}`}>
@@ -80,7 +85,7 @@ export default function TrackerTable({
               
               {/* Row 3: Day numbers */}
               <tr>
-                {calendarCols.map((col, idx) => {
+                {safeCols.map((col, idx) => {
                   const bgClass = styles[`thDateNumber${col.weekIndex}`];
                   return (
                     <th 
@@ -96,7 +101,7 @@ export default function TrackerTable({
             </thead>
             
             <tbody>
-              {habitsStats.map((habit, idx) => (
+              {safeHabitsStats.map((habit, idx) => (
                 <tr key={`row-${habit.id}`}>
                   {/* Habit name sticky cell */}
                   <td className={`${styles.gridCell} ${styles.tdStickyLeft}`}>
@@ -217,19 +222,19 @@ export default function TrackerTable({
                   </div>
                 </td>
                 
-                {calendarCols.map((col, idx) => {
+                {safeCols.map((col, idx) => {
                   if (!col.inMonth) {
                     return <td key={`reward-cell-${idx}`} className={styles.gridCell} style={{ backgroundColor: 'var(--panel-bg)' }} />;
                   }
                   
-                  const completionsCount = habits.filter(h => 
+                  const completionsCount = (habits || []).filter(h => 
                     h.completions?.some(c => (typeof c === 'string' ? c : c?.date) === col.dateStr) ||
                     h.completedDays?.some(d => (typeof d === 'string' ? d : d?.date) === col.dateStr) ||
                     h.history?.some(h => (typeof h === 'string' ? h : h?.date) === col.dateStr)
                   ).length;
                   
-                  const unlockedRewards = getUnlockedRewards(completionsCount);
-                  const dayClaims = validClaimedRewards.filter(c => c.date === col.dateStr);
+                  const unlockedRewards = safeGetUnlocked(completionsCount);
+                  const dayClaims = safeClaims.filter(c => c && c.date === col.dateStr);
                   const claimedCount = dayClaims.length;
                   
                   if (unlockedRewards > 0) {
@@ -242,7 +247,7 @@ export default function TrackerTable({
                       <td 
                         key={`reward-cell-${idx}`} 
                         className={styles.rewardCell}
-                        onClick={() => handleOpenClaimModal(col.dateStr, unlockedRewards)}
+                        onClick={() => handleOpenClaimModal && handleOpenClaimModal(col.dateStr, unlockedRewards)}
                         title="Click to claim rewards"
                         style={{ cursor: 'pointer', padding: '2px' }}
                       >
@@ -257,7 +262,7 @@ export default function TrackerTable({
                     <td 
                       key={`reward-cell-${idx}`} 
                       className={styles.rewardCell}
-                      onClick={() => handleOpenClaimModal(col.dateStr, 1)}
+                      onClick={() => handleOpenClaimModal && handleOpenClaimModal(col.dateStr, 1)}
                       style={{ cursor: 'pointer', padding: '2px', opacity: 0.6 }}
                       title="Click to manage monthly rewards"
                     >
@@ -271,7 +276,7 @@ export default function TrackerTable({
                 <td className={`${styles.gridCell} ${styles.tdStickyRightGoal}`} style={{ backgroundColor: 'var(--panel-bg)' }} />
                 <td className={`${styles.gridCell} ${styles.tdStickyRightPercent}`} style={{ backgroundColor: 'var(--panel-bg)' }} />
                 <td className={`${styles.gridCell} ${styles.tdStickyRightCount}`} style={{ backgroundColor: 'var(--panel-bg)', fontWeight: 'bold', color: 'var(--week3-color)', textAlign: 'center' }}>
-                  {validClaimedRewards.length}
+                  {safeClaims.length}
                 </td>
                 <td className={`${styles.gridCell} ${styles.tdStickyRightStreak}`} style={{ backgroundColor: 'var(--panel-bg)' }} />
               </tr>
