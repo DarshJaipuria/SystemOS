@@ -14,9 +14,8 @@ export default function MonthlyHabitsCard({
   monthlyPercent
 }) {
   const totalMonthly = (monthlyHabits || []).length;
-  const completedMonthly = (monthlyHabits || []).filter(m => m.completed).length;
-  const computedPercent = totalMonthly > 0 ? Math.round((completedMonthly / totalMonthly) * 100) : 0;
-  const displayPercent = Number.isFinite(Number(monthlyPercent)) ? Math.round(Number(monthlyPercent)) : computedPercent;
+  const completedMonthly = (monthlyHabits || []).filter(m => Boolean(m.completed)).length;
+  const displayPercent = totalMonthly > 0 ? Math.round((completedMonthly / totalMonthly) * 100) : 0;
 
   return (
     <div className={styles.monthlyHabitsCard}>
@@ -49,12 +48,12 @@ export default function MonthlyHabitsCard({
               <input 
                 type="checkbox"
                 className={styles.checkbox}
-                checked={task.completed}
+                checked={Boolean(task.completed)}
                 onChange={(e) => onToggleMonthly(task.id, e.target.checked)}
               />
               <span 
-                className={`${styles.monthlyCheckText} ${task.completed ? styles.monthlyCompletedText : ''}`}
-                onClick={() => onToggleMonthly(task.id, !task.completed)}
+                className={`${styles.monthlyCheckText} ${Boolean(task.completed) ? styles.monthlyCompletedText : ''}`}
+                onClick={() => onToggleMonthly(task.id, !Boolean(task.completed))}
               >
                 {task.name}
               </span>

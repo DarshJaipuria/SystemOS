@@ -20,9 +20,8 @@ export default function WeeklyHabitsCard({
   };
 
   const totalWeekly = (weeklyHabits || []).length;
-  const completedWeekly = (weeklyHabits || []).filter(w => w.completed).length;
-  const computedPercent = totalWeekly > 0 ? Math.round((completedWeekly / totalWeekly) * 100) : 0;
-  const displayPercent = Number.isFinite(Number(weeklyPercent)) ? Math.round(Number(weeklyPercent)) : computedPercent;
+  const completedWeekly = (weeklyHabits || []).filter(w => Boolean(w.completed)).length;
+  const displayPercent = totalWeekly > 0 ? Math.round((completedWeekly / totalWeekly) * 100) : 0;
 
   return (
     <div className={styles.weeklyHabitsCard}>
@@ -74,8 +73,8 @@ export default function WeeklyHabitsCard({
                         onChange={(e) => onToggleWeekly(task.id, e.target.checked)}
                       />
                       <span 
-                        className={`${styles.weeklyCheckText} ${task.completed ? styles.weeklyCompletedText : ''}`}
-                        onClick={() => onToggleWeekly(task.id, !task.completed)}
+                        className={`${styles.weeklyCheckText} ${Boolean(task.completed) ? styles.weeklyCompletedText : ''}`}
+                        onClick={() => onToggleWeekly(task.id, !Boolean(task.completed))}
                       >
                         {task.name}
                       </span>
