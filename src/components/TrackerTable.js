@@ -183,9 +183,36 @@ export default function TrackerTable({
               {/* Rewards Claim Row */}
               <tr className={styles.rewardsRow}>
                 <td className={`${styles.gridCell} ${styles.tdStickyLeft}`} style={{ backgroundColor: 'var(--panel-bg)', fontWeight: 'bold' }}>
-                  <div className={styles.habitCellContent} style={{ gap: '6px' }}>
-                    <Gift size={13} style={{ color: 'var(--week3-color)' }} />
-                    <span style={{ fontSize: '12px', letterSpacing: '0.5px' }}>daily rewards</span>
+                  <div className={styles.habitCellContent} style={{ gap: '6px', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Gift size={13} style={{ color: 'var(--week3-color)' }} />
+                      <span style={{ fontSize: '12px', letterSpacing: '0.5px' }}>daily rewards</span>
+                    </div>
+                    {openEditRewards && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditRewards();
+                        }}
+                        title="Edit monthly reward options"
+                        style={{
+                          background: 'var(--panel-bg)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          padding: '2px 6px',
+                          fontSize: '11px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          color: 'var(--accent-primary)',
+                          fontWeight: '600'
+                        }}
+                      >
+                        ✏️ Edit
+                      </button>
+                    )}
                   </div>
                 </td>
                 

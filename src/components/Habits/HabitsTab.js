@@ -101,32 +101,55 @@ export default function HabitsTab(props) {
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', marginTop: 'auto' }}>
-        <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: 'var(--text-primary, #0f172a)' }}>Quick Add Habit</h3>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Habit name..."
-            value={newHabitName || ''}
-            onChange={(e) => setNewHabitName && setNewHabitName(e.target.value)}
-            style={{ flex: '1 1 200px', padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', backgroundColor: 'var(--bg-secondary, #f8fafc)', color: 'var(--text-primary, #0f172a)' }}
-          />
-          <input
-            type="number"
-            placeholder="Goal days"
-            min="1"
-            max={daysCount || 31}
-            value={newHabitGoal || 15}
-            onChange={(e) => setNewHabitGoal && setNewHabitGoal(Math.min(daysCount || 31, Math.max(1, parseInt(e.target.value) || 1)))}
-            style={{ width: '100px', padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', backgroundColor: 'var(--bg-secondary, #f8fafc)', color: 'var(--text-primary, #0f172a)' }}
-          />
-          <button
-            onClick={() => handleAddHabit && handleAddHabit(newHabitName, newHabitGoal)}
-            style={{ padding: '10px 20px', borderRadius: '8px', backgroundColor: 'var(--accent-primary, #6366f1)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Add
-          </button>
+      <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ flex: '1 1 300px' }}>
+          <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: 'var(--text-primary, #0f172a)' }}>Quick Add Habit</h3>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              placeholder="Habit name..."
+              value={newHabitName || ''}
+              onChange={(e) => setNewHabitName && setNewHabitName(e.target.value)}
+              style={{ flex: '1 1 200px', padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', backgroundColor: 'var(--bg-secondary, #f8fafc)', color: 'var(--text-primary, #0f172a)' }}
+            />
+            <input
+              type="number"
+              placeholder="Goal days"
+              min="1"
+              max={daysCount || 31}
+              value={newHabitGoal || 15}
+              onChange={(e) => setNewHabitGoal && setNewHabitGoal(Math.min(daysCount || 31, Math.max(1, parseInt(e.target.value) || 1)))}
+              style={{ width: '100px', padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)', backgroundColor: 'var(--bg-secondary, #f8fafc)', color: 'var(--text-primary, #0f172a)' }}
+            />
+            <button
+              onClick={() => handleAddHabit && handleAddHabit(newHabitName, newHabitGoal)}
+              style={{ padding: '10px 20px', borderRadius: '8px', backgroundColor: 'var(--accent-primary, #6366f1)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Add
+            </button>
+          </div>
         </div>
+
+        {openEditRewards && (
+          <button
+            onClick={openEditRewards}
+            style={{
+              padding: '10px 18px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--panel-bg, #f8fafc)',
+              border: '1px solid var(--border-color, #e2e8f0)',
+              color: 'var(--accent-primary, #6366f1)',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '13px'
+            }}
+          >
+            🎁 Edit Monthly Rewards
+          </button>
+        )}
       </div>
     </div>
   );

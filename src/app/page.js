@@ -1007,6 +1007,7 @@ export default function DashboardPage() {
         rewardsFormNames={rewardsFormNames}
         setRewardsFormNames={setRewardsFormNames}
         handleSaveRewards={handleSaveRewards}
+        openEditRewards={openEditRewards}
         showClaimModal={showClaimModal}
         setShowClaimModal={setShowClaimModal}
         selectedClaimDate={selectedClaimDate}

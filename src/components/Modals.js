@@ -36,61 +36,60 @@ export default function Modals({
   habits,
   rewards,
   getUnlockedRewards,
-  handleSaveClaims
+  handleSaveClaims,
+  openEditRewards
 }) {
   return (
     <>
-      {/* 1. MODAL: Import Rollover Onboarding */}
-      {showImportModal && (
+      {/* 1. MODAL: Import Habits */}
+      {showImportModal && prevMonthDetails && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h2 className={styles.modalTitle}>Import Previous Habits?</h2>
+            <h2 className={styles.modalTitle}>Import Habits</h2>
             <div className={styles.modalBody}>
-              We noticed you have habits tracked in <strong>{MONTH_NAMES[prevMonthDetails.month - 1]} {prevMonthDetails.year}</strong>. 
-              Would you like to import all daily, weekly, and monthly habits (including affirmations and photos) to <strong>{MONTH_NAMES[selectedMonth - 1]} {selectedYear}</strong>?
-              <br/><br/>
-              <em>This lets you maintain consistency without having to type everything again. All checkmarks will be cleared.</em>
+              <p style={{ fontSize: '13px', color: 'var(--text-dark)', lineHeight: '1.5' }}>
+                You have <strong>{prevMonthDetails.count} habits</strong> tracked in {MONTH_NAMES[prevMonthDetails.month - 1]} {prevMonthDetails.year}.
+                Would you like to import them into {MONTH_NAMES[selectedMonth - 1]} {selectedYear}?
+              </p>
             </div>
             <div className={styles.modalActions}>
-              <button className={styles.modalBtnCancel} onClick={() => setShowImportModal(false)}>
-                Start Fresh
+              <button className={styles.modalBtnCancel} type="button" onClick={() => setShowImportModal(false)}>
+                Skip
               </button>
-              <button className={styles.modalBtnConfirm} onClick={handleImportHabits}>
-                Yes, Copy My Habits
+              <button className={styles.modalBtnConfirm} type="button" onClick={handleImportHabits}>
+                Import Habits
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 2. MODAL: Edit Daily Habit Goal/Name */}
+      {/* 2. MODAL: Edit Habit */}
       {editingHabit && (
         <div className={styles.modalOverlay}>
-          <form className={styles.modalContent} onSubmit={handleUpdateHabit}>
-            <h2 className={styles.modalTitle}>Edit Habit Settings</h2>
+          <form className={styles.modalContent} onSubmit={(e) => { e.preventDefault(); handleUpdateHabit(); }}>
+            <h2 className={styles.modalTitle}>Edit Habit</h2>
             <div className={styles.modalBody}>
-              <div className={styles.modalFormGroup}>
-                <label className={styles.label}>Habit Name</label>
-                <input 
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Habit Name</label>
+                <input
                   className={styles.modalInput}
-                  type="text" 
+                  type="text"
                   value={editHabitName}
                   onChange={(e) => setEditHabitName(e.target.value)}
                   required
-                  aria-label="Edit Habit Name"
                 />
               </div>
-              <div className={styles.modalFormGroup}>
-                <label className={styles.label}>Monthly Completion Goal (Days)</label>
-                <input 
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Goal Days</label>
+                <input
                   className={styles.modalInput}
-                  type="number" 
+                  type="number"
                   min="1"
                   max={daysCount}
                   value={editHabitGoal}
-                  onChange={(e) => setEditHabitGoal(Math.min(daysCount, Math.max(1, parseInt(e.target.value) || 1)))}
+                  onChange={(e) => setEditHabitGoal(e.target.value)}
                   required
-                  aria-label="Edit Goal Days"
                 />
               </div>
             </div>
@@ -99,14 +98,14 @@ export default function Modals({
                 Cancel
               </button>
               <button className={styles.modalBtnConfirm} type="submit">
-                Save Changes
+                Save
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* 3. MODAL: Set Month's Reward Options & Clone */}
+      {/* 3. MODAL: Set/Edit Month's Rewards */}
       {showRewardsModal && (
         <div className={styles.modalOverlay}>
           <form className={styles.modalContent} onSubmit={(e) => { e.preventDefault(); handleSaveRewards(); }}>
@@ -236,10 +235,33 @@ export default function Modals({
       {showClaimModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h2 className={styles.modalTitle} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Gift size={20} style={{ color: 'var(--week3-color)' }} />
-              <span>Claim Daily Rewards</span>
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 className={styles.modalTitle} style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Gift size={20} style={{ color: 'var(--week3-color)' }} />
+                <span>Claim Daily Rewards</span>
+              </h2>
+              {openEditRewards && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowClaimModal(false);
+                    openEditRewards();
+                  }}
+                  style={{
+                    background: 'var(--panel-bg)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    color: 'var(--accent-primary)',
+                    fontWeight: '600'
+                  }}
+                >
+                  ✏️ Edit Reward Options
+                </button>
+              )}
+            </div>
             <div className={styles.modalBody} style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-dark)', marginBottom: '8px' }}>
                 Date: <strong>{selectedClaimDate}</strong>
