@@ -1,22 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import styles from '@/app/page.module.css';
 
 export default function WeeklyHabitsCard({
-  weeklyHabits,
-  newWeeklyName,
+  weeklyHabits: propWeeklyHabits = [],
+  newWeeklyName = {},
   setNewWeeklyName,
   onAddWeekly,
   onToggleWeekly,
-  onDeleteWeekly,
-  weeklyPercent
+  onDeleteWeekly
 }) {
   const weeks = [1, 2, 3, 4, 5];
+  const [weeklyHabits, setWeeklyHabits] = useState(propWeeklyHabits);
+
+  useEffect(() => {
+    setWeeklyHabits(propWeeklyHabits);
+  }, [propWeeklyHabits]);
+
+  const handleToggle = (id, completed) => {
+    setWeeklyHabits(prev => prev.map(w => String(w.id) === String(id) ? { ...w, completed: Boolean(completed) } : w));
+    if (onToggleWeekly) {
+      onToggleWeekly(id, completed);
+    }
+  };
+
+  const handleDelete = (id) => {
+    setWeeklyHabits(prev => prev.filter(w => String(w.id) !== String(id)));
+    if (onDeleteWeekly) {
+      onDeleteWeekly(id);
+    }
+  };
 
   const handleTextChange = (weekIndex, val) => {
-    setNewWeeklyName(prev => ({ ...prev, [weekIndex]: val }));
+    if (setNewWeeklyName) {
+      setNewWeeklyName(prev => ({ ...prev, [weekIndex]: val }));
+    }
   };
 
   const totalWeekly = (weeklyHabits || []).length;
@@ -50,7 +70,7 @@ export default function WeeklyHabitsCard({
         {/* Week Columns */}
         <div className={styles.weeklyHabitsGrid}>
           {weeks.map(weekIdx => {
-            const weekTasks = weeklyHabits.filter(w => w.weekIndex === weekIdx);
+            const weekTasks = (weeklyHabits || []).filter(w => Number(w.weekIndex) === weekIdx);
             const headerColors = ['#e1ecf7', '#fce4e8', '#e3f6ed', '#fcf1db', '#ecebf7'];
             const textColors = ['#395b80', '#d7768a', '#559e7e', '#c99335', '#7b75b3'];
 
@@ -67,25 +87,28 @@ export default function WeeklyHabitsCard({
                     <div key={task.id} className={styles.weeklyCheckItem}>
                       <input 
                         type="checkbox"
-                        className={styles.checkbox}
-                        style={{ width: '13px', height: '13px', border: '1px solid #d1cfea' }}
-                        checked={task.completed}
-                        onChange={(e) => onToggleWeekly(task.id, e.target.checked)}
+                        style={{ width: '13px', height: '13px', cursor: 'pointer' }}
+                        checked={Boolean(task.completed)}
+                        onChange={(e) => handleToggle(task.id, e.target.checked)}
                       />
                       <span 
                         className={`${styles.weeklyCheckText} ${Boolean(task.completed) ? styles.weeklyCompletedText : ''}`}
-                        onClick={() => onToggleWeekly(task.id, !Boolean(task.completed))}
+                        onClick={() => handleToggle(task.id, !Boolean(task.completed))}
+                        style={{ cursor: 'pointer' }}
                       >
                         {task.name}
                       </span>
-                      <button className={styles.actionBtn} onClick={() => onDeleteWeekly(task.id)} style={{ padding: 0 }}>
+                      <button className={styles.actionBtn} onClick={() => handleDelete(task.id)} style={{ padding: 0, cursor: 'pointer' }}>
                         <Trash2 size={10} />
                       </button>
                     </div>
                   ))}
+                  {weekTasks.length === 0 && (
+                    <div style={{ opacity: 0.4, fontSize: '9px', fontStyle: 'italic', padding: '4px 0' }}>No tasks</div>
+                  )}
                 </div>
                 <form 
-                  onSubmit={(e) => onAddWeekly(e, weekIdx)}
+                  onSubmit={(e) => onAddWeekly && onAddWeekly(e, weekIdx)}
                   style={{ display: 'flex', gap: '2px', marginTop: '4px' }}
                 >
                   <input 
@@ -98,7 +121,7 @@ export default function WeeklyHabitsCard({
                   />
                   <button 
                     type="submit" 
-                    style={{ border: 'none', background: '#b0cbe8', color: '#fff', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    style={{ padding: '4px 6px', background: '#719ac6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                   >
                     <Plus size={10} />
                   </button>
